@@ -11,7 +11,7 @@
 # Basics
 ################################
 
-wordpress_instances: ["multi_wordpress"]
+wordpress_instances: ["multi-wordpress"]
 
 ################################
 # Paths
