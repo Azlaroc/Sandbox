@@ -1,0 +1,16 @@
+#########################################################################
+# Title:            Sandbox: WordPress                                  #
+# Author(s):        Migz93, salty                                       #
+# URL:              https://github.com/saltyorg/Sandbox                 #
+# --                                                                    #
+#########################################################################
+#                   GNU General Public License v3.0                     #
+#########################################################################
+---
+- name: "Execute multi_wordpress roles"
+  ansible.builtin.include_tasks: main2.yml
+  vars:
+    wordpress_name: "{{ wordpress_role }}"
+  with_items: "{{ wordpress_instances }}"
+  loop_control:
+    loop_var: wordpress_role
