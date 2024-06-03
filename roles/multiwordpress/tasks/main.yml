@@ -1,0 +1,16 @@
+#########################################################################
+# Title:            Sandbox: MultiWordPress                             #
+# Author(s):        Migz93, salty                                       #
+# URL:              https://github.com/saltyorg/Sandbox                 #
+# --                                                                    #
+#########################################################################
+#                   GNU General Public License v3.0                     #
+#########################################################################
+---
+- name: "Execute MultiWordPress roles"
+  ansible.builtin.include_tasks: main2.yml
+  vars:
+    multiwordpress_name: "{{ multiwordpress_role }}"
+  with_items: "{{ multiwordpress_instances }}"
+  loop_control:
+    loop_var: multiwordpress_role

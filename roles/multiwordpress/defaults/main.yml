@@ -1,0 +1,156 @@
+##########################################################################
+# Title:         Sandbox: MultiWordPress | Default Variables             #
+# Author(s):     salty                                                   #
+# URL:           https://github.com/saltyorg/Sandbox                     #
+# --                                                                     #
+##########################################################################
+#                   GNU General Public License v3.0                      #
+##########################################################################
+---
+################################
+# Basics
+################################
+
+multiwordpress_instances: ["multiwordpress"]
+
+################################
+# Paths
+################################
+
+multiwordpress_paths_folder: "{{ multiwordpress_name }}"
+multiwordpress_paths_location: "{{ server_appdata_path }}/{{ multiwordpress_paths_folder }}"
+multiwordpress_paths_folders_list:
+  - "{{ multiwordpress_paths_location }}"
+multiwordpress_paths_recursive: true
+
+################################
+# Web
+################################
+
+multiwordpress_web_subdomain: "{{ multiwordpress_name }}"
+multiwordpress_web_domain: "{{ user.domain }}"
+multiwordpress_web_port: "80"
+multiwordpress_web_url: "{{ 'https://' + (lookup('vars', multiwordpress_name + '_web_subdomain', default=multiwordpress_web_subdomain) + '.' + lookup('vars', multiwordpress_name + '_web_domain', default=multiwordpress_web_domain)
+                    if (lookup('vars', multiwordpress_name + '_web_subdomain', default=multiwordpress_web_subdomain) | length > 0)
+                    else lookup('vars', multiwordpress_name + '_web_domain', default=multiwordpress_web_domain)) }}"
+
+################################
+# DNS
+################################
+
+multiwordpress_dns_record: "{{ lookup('vars', multiwordpress_name + '_web_subdomain', default=multiwordpress_web_subdomain) }}"
+multiwordpress_dns_zone: "{{ lookup('vars', multiwordpress_name + '_web_domain', default=multiwordpress_web_domain) }}"
+multiwordpress_dns_proxy: "{{ dns.proxied }}"
+
+################################
+# Traefik
+################################
+
+multiwordpress_traefik_sso_middleware: ""
+multiwordpress_traefik_middleware_default: "{{ traefik_default_middleware }}"
+multiwordpress_traefik_middleware_custom: ""
+multiwordpress_traefik_certresolver: "{{ traefik_default_certresolver }}"
+multiwordpress_traefik_enabled: true
+multiwordpress_traefik_api_enabled: false
+multiwordpress_traefik_api_endpoint: ""
+
+################################
+# Docker
+################################
+
+# Container
+multiwordpress_docker_container: "{{ multiwordpress_name }}"
+
+# Image
+multiwordpress_docker_image_pull: true
+multiwordpress_docker_image_repo: "wordpress"
+multiwordpress_docker_image_tag: "latest"
+multiwordpress_docker_image: "{{ lookup('vars', multiwordpress_name + '_docker_image_repo', default=multiwordpress_docker_image_repo)
+                            + ':' + lookup('vars', multiwordpress_name + '_docker_image_tag', default=multiwordpress_docker_image_tag) }}"
+
+# Ports
+multiwordpress_docker_ports_defaults: []
+multiwordpress_docker_ports_custom: []
+multiwordpress_docker_ports: "{{ lookup('vars', multiwordpress_name + '_docker_ports_defaults', default=multiwordpress_docker_ports_defaults)
+                            + lookup('vars', multiwordpress_name + '_docker_ports_custom', default=multiwordpress_docker_ports_custom) }}"
+
+# Envs
+multiwordpress_docker_envs_default:
+  TZ: "{{ tz }}"
+  WORDPRESS_DB_HOST: "mariadb:3306"
+  WORDPRESS_DB_USER: "root"
+  WORDPRESS_DB_PASSWORD: "password321"
+  WORDPRESS_DB_NAME: "{{ multiwordpress_name }}"
+multiwordpress_docker_envs_custom: {}
+multiwordpress_docker_envs: "{{ lookup('vars', multiwordpress_name + '_docker_envs_default', default=multiwordpress_docker_envs_default)
+                           | combine(lookup('vars', multiwordpress_name + '_docker_envs_custom', default=multiwordpress_docker_envs_custom)) }}"
+
+# Commands
+multiwordpress_docker_commands_default: []
+multiwordpress_docker_commands_custom: []
+multiwordpress_docker_commands: "{{ lookup('vars', multiwordpress_name + '_docker_commands_default', default=multiwordpress_docker_commands_default)
+                               + lookup('vars', multiwordpress_name + '_docker_commands_custom', default=multiwordpress_docker_commands_custom) }}"
+
+# Volumes
+multiwordpress_docker_volumes_default:
+  - "{{ multiwordpress_paths_location }}:/var/www/html"
+multiwordpress_docker_volumes_custom: []
+multiwordpress_docker_volumes: "{{ lookup('vars', multiwordpress_name + '_docker_volumes_default', default=multiwordpress_docker_volumes_default)
+                              + lookup('vars', multiwordpress_name + '_docker_volumes_custom', default=multiwordpress_docker_volumes_custom) }}"
+
+# Devices
+multiwordpress_docker_devices_default: []
+multiwordpress_docker_devices_custom: []
+multiwordpress_docker_devices: "{{ lookup('vars', multiwordpress_name + '_docker_devices_default', default=multiwordpress_docker_devices_default)
+                              + lookup('vars', multiwordpress_name + '_docker_devices_custom', default=multiwordpress_docker_devices_custom) }}"
+
+# Hosts
+multiwordpress_docker_hosts_default: []
+multiwordpress_docker_hosts_custom: []
+multiwordpress_docker_hosts: "{{ docker_hosts_common
+                            | combine(lookup('vars', multiwordpress_name + '_docker_hosts_default', default=multiwordpress_docker_hosts_default))
+                            | combine(lookup('vars', multiwordpress_name + '_docker_hosts_custom', default=multiwordpress_docker_hosts_custom)) }}"
+
+# Labels
+multiwordpress_docker_labels_default: {}
+multiwordpress_docker_labels_custom: {}
+multiwordpress_docker_labels: "{{ docker_labels_common
+                           | combine(lookup('vars', multiwordpress_name + '_docker_labels_default', default=multiwordpress_docker_labels_default))
+                           | combine(lookup('vars', multiwordpress_name + '_docker_labels_custom', default=multiwordpress_docker_labels_custom)) }}"
+
+# Hostname
+multiwordpress_docker_hostname: "{{ multiwordpress_name }}"
+
+# Networks
+multiwordpress_docker_networks_alias: "{{ multiwordpress_name }}"
+multiwordpress_docker_networks_default: []
+multiwordpress_docker_networks_custom: []
+multiwordpress_docker_networks: "{{ docker_networks_common
+                               + lookup('vars', multiwordpress_name + '_docker_networks_default', default=multiwordpress_docker_networks_default)
+                               + lookup('vars', multiwordpress_name + '_docker_networks_custom', default=multiwordpress_docker_networks_custom) }}"
+
+# Capabilities
+multiwordpress_docker_capabilities_default: []
+multiwordpress_docker_capabilities_custom: []
+multiwordpress_docker_capabilities: "{{ lookup('vars', multiwordpress_name + '_docker_capabilities_default', default=multiwordpress_docker_capabilities_default)
+                                   + lookup('vars', multiwordpress_name + '_docker_capabilities_custom', default=multiwordpress_docker_capabilities_custom) }}"
+
+# Security Opts
+multiwordpress_docker_security_opts_default: []
+multiwordpress_docker_security_opts_custom: []
+multiwordpress_docker_security_opts: "{{ lookup('vars', multiwordpress_name + '_docker_security_opts_default', default=multiwordpress_docker_security_opts_default)
+                                    + lookup('vars', multiwordpress_name + '_docker_security_opts_custom', default=multiwordpress_docker_security_opts_custom) }}"
+
+# Restart Policy
+multiwordpress_docker_restart_policy: unless-stopped
+
+# State
+multiwordpress_docker_state: started
+
+# User
+multiwordpress_docker_user: "{{ uid }}:{{ gid }}"
+
+# Dependencies
+multiwordpress_depends_on: "mariadb"
+multiwordpress_depends_on_delay: "0"
+multiwordpress_depends_on_healthchecks: "false"
