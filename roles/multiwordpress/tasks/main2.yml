@@ -24,10 +24,18 @@
 - name: Create directories
   ansible.builtin.include_tasks: "{{ resources_tasks_path }}/directories/create_directories.yml"
 
+#- name: Debug multiwordpress_login_host before role
+#  ansible.builtin.debug:
+#    msg: "multiwordpress_login_host before role is set to {{ multiwordpress_login_host }}"
+
+#- name: Debug mariadb_docker_env_password before role
+#  ansible.builtin.debug:
+#    msg: "mariadb_docker_env_password before role is set to {{ mariadb_docker_env_password }}"
+
 - name: MariaDB | Create multiwordpress database
   community.mysql.mysql_db:
     name: "{{ multiwordpress_name }}"
-    login_host: "mariadb"
+    login_host: "{{ multiwordpress_login_host }}"
     login_user: "root"
     login_password: "{{ mariadb_docker_env_password }}"
     state: present
