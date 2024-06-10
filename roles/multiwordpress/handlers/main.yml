@@ -7,10 +7,16 @@
 #                   GNU General Public License v3.0                     #
 #########################################################################
 ---
-- name: "Execute multiwordpress roles"
-  ansible.builtin.include_tasks: main2.yml
-  vars:
-    multiwordpress_name: "{{ multiwordpress_role }}"
-  with_items: "{{ multiwordpress_instances }}"
-  loop_control:
-    loop_var: multiwordpress_role
+# Handlers file for multiwordpress role
+
+- name: restart mariadb
+  community.docker.docker_container:
+    name: "{{ db_var }}"
+    state: started
+    recreate: true
+
+- name: restart multiwordpress
+  community.docker.docker_container:
+    name: "{{ wb_var }}"
+    state: started
+    recreate: true

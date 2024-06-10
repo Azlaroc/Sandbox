@@ -1,12 +1,15 @@
 #########################################################################
-# Title:            Sandbox: multiwordpress                                  #
-# Author(s):        Migz93, salty                                       #
+# Title:            Sandbox: multiwordpress                             #
+# Author(s):        Azlaroc                                             #
 # URL:              https://github.com/saltyorg/Sandbox                 #
 # --                                                                    #
 #########################################################################
 #                   GNU General Public License v3.0                     #
 #########################################################################
 ---
+- name: Generate SSL Certificates
+  ansible.builtin.include_tasks: generate_ssl.yml
+
 - name: MariaDB Role
   ansible.builtin.include_role:
     name: mariadb
@@ -24,14 +27,6 @@
 - name: Create directories
   ansible.builtin.include_tasks: "{{ resources_tasks_path }}/directories/create_directories.yml"
 
-#- name: Debug multiwordpress_login_host before role
-#  ansible.builtin.debug:
-#    msg: "multiwordpress_login_host before role is set to {{ multiwordpress_login_host }}"
-
-#- name: Debug mariadb_docker_env_password before role
-#  ansible.builtin.debug:
-#    msg: "mariadb_docker_env_password before role is set to {{ mariadb_docker_env_password }}"
-
 - name: MariaDB | Create multiwordpress database
   community.mysql.mysql_db:
     name: "{{ multiwordpress_name }}"
@@ -42,3 +37,9 @@
 
 - name: Create Docker container
   ansible.builtin.include_tasks: "{{ resources_tasks_path }}/docker/create_docker_container.yml"
+
+- name: Configure MariaDB with SSL
+  ansible.builtin.include_tasks: configure_mariadb.yml
+
+- name: Configure WordPress with SSL
+  ansible.builtin.include_tasks: configure_wordpress.yml

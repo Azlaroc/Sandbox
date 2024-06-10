@@ -1,6 +1,6 @@
 ##########################################################################
-# Title:         Sandbox: multiwordpress | Default Variables                  #
-# Author(s):     salty                                                   #
+# Title:         Sandbox: multiwordpress | Default Variables             #
+# Author(s):     Azlaroc                                                 #
 # URL:           https://github.com/saltyorg/Sandbox                     #
 # --                                                                     #
 ##########################################################################
@@ -22,6 +22,7 @@ multiwordpress_paths_location: "{{ server_appdata_path }}/{{ multiwordpress_path
 multiwordpress_paths_folders_list:
   - "{{ multiwordpress_paths_location }}"
 multiwordpress_paths_recursive: true
+multiwordpress_paths_certs: "/opt/certs"
 
 ################################
 # Web

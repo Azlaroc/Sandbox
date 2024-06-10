@@ -1,0 +1,48 @@
+#########################################################################
+# Title:            Sandbox: multiwordpress                             #
+# Author(s):        Azlaroc                                             #
+# URL:              https://github.com/saltyorg/Sandbox                 #
+# --                                                                    #
+#########################################################################
+#                   GNU General Public License v3.0                     #
+#########################################################################
+---
+# Task file to configure MariaDB with SSL
+
+- name: Debug mariadb_role variable
+  ansible.builtin.debug:
+    msg: "mariadb_role is {{ db_var }}"
+
+- name: Get current container details for MariaDB
+  community.docker.docker_container_info:
+    name: "{{ db_var }}"
+  register: mariadb_container_info
+
+- name: Debug mariadb_container_info
+  ansible.builtin.debug:
+    var: mariadb_container_info
+
+- name: Check if MariaDB container info is retrieved
+  ansible.builtin.fail:
+    msg: "Failed to retrieve MariaDB container info."
+  when: mariadb_container_info.container is not defined
+
+- name: Convert environment variables to dictionary
+  ansible.builtin.set_fact:
+    mariadb_env_dict: >-
+      {{
+        dict(mariadb_container_info.container.Config.Env | map('split', '=', 1) | map('first') | zip(mariadb_container_info.container.Config.Env | map('split', '=', 1) | map('last')))
+      }}
+
+- name: Configure MariaDB container with SSL settings
+  community.docker.docker_container:
+    name: "{{ db_var }}"
+    image: "{{ mariadb_container_info.container.Image }}"
+    env: "{{ mariadb_env_dict }}"
+    volumes: "{{ mariadb_container_info.container.HostConfig.Binds | default([]) + [multiwordpress_paths_certs ~ '/' ~ multiwordpress_name ~ ':/etc/mysql/certs:ro'] }}"
+    command: "mariadbd --ssl-ca=/etc/mysql/certs/certificate.crt --ssl-cert=/etc/mysql/certs/certificate.crt --ssl-key=/etc/mysql/certs/private.key"
+    labels: "{{ mariadb_container_info.container.Config.Labels }}"
+    state: started
+    recreate: true
+    network_mode: "{{ mariadb_container_info.container.HostConfig.NetworkMode }}"
+    restart_policy: "{{ mariadb_container_info.container.HostConfig.RestartPolicy.Name }}"

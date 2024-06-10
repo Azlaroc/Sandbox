@@ -1,0 +1,47 @@
+#########################################################################
+# Title:            Sandbox: multiwordpress                             #
+# Author(s):        Azlaroc                                             #
+# URL:              https://github.com/saltyorg/Sandbox                 #
+# --                                                                    #
+#########################################################################
+#                   GNU General Public License v3.0                     #
+#########################################################################
+---
+# Task file to reconfigure multiwordpress for SSL
+
+- name: Debug multiwordpress_role variable
+  ansible.builtin.debug:
+    msg: "multiwordpress_role is {{ multiwordpress_role }}"
+
+- name: Get current container details for WordPress
+  community.docker.docker_container_info:
+    name: "{{ multiwordpress_role }}"
+  register: wordpress_container_info
+
+- name: Debug wordpress_container_info
+  ansible.builtin.debug:
+    var: wordpress_container_info
+
+- name: Check if WordPress container info is retrieved
+  ansible.builtin.fail:
+    msg: "Failed to retrieve WordPress container info."
+  when: wordpress_container_info.container is not defined
+
+- name: Convert environment variables to dictionary
+  ansible.builtin.set_fact:
+    wordpress_env_dict: >-
+      {{
+        dict(wordpress_container_info.container.Config.Env | map('split', '=', 1) | map('first') | zip(wordpress_container_info.container.Config.Env | map('split', '=', 1) | map('last')))
+      }}
+
+- name: Configure multiwordpress container with SSL settings
+  community.docker.docker_container:
+    name: "{{ multiwordpress_role }}"
+    image: "{{ wordpress_container_info.container.Image }}"
+    env: "{{ wordpress_env_dict | combine({'WORDPRESS_DB_SSL_KEY': '/etc/ssl/multiwordpress/private.key', 'WORDPRESS_DB_SSL_CERT': '/etc/ssl/multiwordpress/certificate.crt', 'WORDPRESS_DB_SSL_CA': '/etc/ssl/multiwordpress/certificate.crt'}) }}"
+    volumes: "{{ wordpress_container_info.container.HostConfig.Binds | default([]) + [multiwordpress_paths_certs ~ '/' ~ multiwordpress_name ~ ':/etc/ssl/multiwordpress:ro'] }}"
+    labels: "{{ wordpress_container_info.container.Config.Labels }}"
+    state: started
+    recreate: true
+    network_mode: "{{ wordpress_container_info.container.HostConfig.NetworkMode }}"
+    restart_policy: "{{ wordpress_container_info.container.HostConfig.RestartPolicy.Name }}"
